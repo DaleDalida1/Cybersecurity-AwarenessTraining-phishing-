@@ -1,0 +1,573 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing Awareness Training</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f4fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    #app {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0a2a5e 0%, #1a4a9e 100%);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header-icon {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header h1 { color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 3px; }
+    .header p { color: rgba(255,255,255,0.75); font-size: 13px; }
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px; height: 6px; margin-top: 10px; width: 100%;
+    }
+    .progress-bar-fill {
+      height: 6px; border-radius: 4px;
+      background: #4fc3f7;
+      transition: width 0.4s ease;
+    }
+    .score-block { text-align: right; flex-shrink: 0; }
+    .score-block .num { color: #fff; font-size: 26px; font-weight: 600; }
+    .score-block .lbl { color: rgba(255,255,255,0.65); font-size: 12px; }
+
+    .scenario-card {
+      background: #fff;
+      border: 1px solid #dde4f0;
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(10,42,94,0.06);
+    }
+
+    .scenario-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      color: #1a4a9e; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .scenario-title {
+      font-size: 18px; font-weight: 600;
+      color: #0a2a5e; margin-bottom: 6px;
+    }
+    .scenario-desc {
+      font-size: 14px; color: #4a5568;
+      margin-bottom: 1.25rem; line-height: 1.6;
+    }
+
+    .instruction-box {
+      background: #e8f0fe;
+      border-left: 3px solid #1a4a9e;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #0a2a5e;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .email-frame {
+      border: 1px solid #c8d4eb;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      user-select: none;
+    }
+    .email-header-bar {
+      background: #f5f8ff;
+      border-bottom: 1px solid #dde4f0;
+      padding: 10px 14px;
+    }
+    .email-field { display: flex; gap: 8px; font-size: 13px; margin-bottom: 4px; }
+    .email-field:last-child { margin-bottom: 0; }
+    .email-field-label { color: #666; font-weight: 600; min-width: 44px; }
+    .email-subject-bar {
+      background: #fff;
+      border-bottom: 1px solid #dde4f0;
+      padding: 9px 14px;
+      font-size: 14px; font-weight: 600;
+      color: #1a1a2e;
+    }
+    .email-body {
+      background: #fff;
+      padding: 16px 14px;
+      font-size: 14px; line-height: 1.8;
+      color: #2d3748;
+    }
+
+    .hotspot {
+      display: inline;
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 1px 2px;
+      transition: background 0.15s;
+    }
+    .hotspot:hover { background: rgba(26,74,158,0.1); }
+    .hotspot.selected-correct {
+      background: rgba(39,174,96,0.18);
+      outline: 2px solid #27ae60;
+      border-radius: 3px;
+    }
+    .hotspot.selected-wrong {
+      background: rgba(192,57,43,0.12);
+      outline: 2px solid #c0392b;
+      border-radius: 3px;
+    }
+    .hotspot.revealed-missed {
+      background: rgba(230,126,34,0.15);
+      outline: 2px dashed #e67e22;
+      border-radius: 3px;
+    }
+
+    .mini-toast {
+      font-size: 12px;
+      min-height: 18px;
+      margin-bottom: 8px;
+      padding-left: 2px;
+    }
+
+    .btn-primary {
+      background: #1a4a9e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { background: #0a2a5e; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { background: #9ab3d4; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: #1a4a9e;
+      border: 1.5px solid #1a4a9e;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: rgba(26,74,158,0.07); }
+
+    .sel-count {
+      font-size: 13px;
+      color: #4a5568;
+    }
+
+    .feedback-panel {
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 1rem;
+      font-size: 14px;
+      line-height: 1.6;
+      display: none;
+    }
+    .feedback-panel.correct { background: #eafaf1; border: 1px solid #27ae60; color: #1a5c38; }
+    .feedback-panel.partial  { background: #fef9e7; border: 1px solid #e67e22; color: #7d4e00; }
+    .feedback-panel.wrong    { background: #fdedec; border: 1px solid #c0392b; color: #7b241c; }
+    .feedback-title { font-weight: 600; margin-bottom: 6px; font-size: 15px; }
+    .feedback-list { margin: 8px 0 0 18px; }
+    .feedback-list li { margin-bottom: 4px; }
+
+    .score-pill {
+      display: inline-block;
+      background: #e8f0fe;
+      color: #1a4a9e;
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .next-wrap { margin-top: 1rem; display: none; }
+
+    /* Final screen */
+    .final-screen { text-align: center; padding: 2rem 1rem; }
+    .final-badge {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      margin: 0 auto 1rem;
+    }
+    .final-badge.great        { background: #eafaf1; }
+    .final-badge.good         { background: #fef9e7; }
+    .final-badge.needs-work   { background: #fdedec; }
+    .final-score-num { font-size: 42px; font-weight: 700; color: #0a2a5e; margin-bottom: 4px; }
+    .final-label { font-size: 20px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px; }
+    .final-sub   { font-size: 14px; color: #4a5568; margin-bottom: 1.5rem; }
+
+    .key-takeaways {
+      text-align: left;
+      background: #e8f0fe;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .key-takeaways h3 {
+      font-size: 14px; font-weight: 600; color: #0a2a5e; margin-bottom: 10px;
+    }
+    .key-takeaways ul {
+      margin-left: 18px; font-size: 13px; color: #1a3a6e; line-height: 1.9;
+    }
+
+    .btn-row {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 12px;
+      color: #8899aa;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="header">
+    <div class="header-icon">
+      <i class="ti ti-shield-lock" style="font-size:26px; color:#fff;"></i>
+    </div>
+    <div style="flex:1;">
+      <h1>Cybersecurity Awareness Training</h1>
+      <p>Phishing Email Recognition Module</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="num" id="scoreDisp">0</div>
+      <div class="lbl">pts</div>
+    </div>
+  </div>
+  <div id="scenarioArea"></div>
+  <footer>Cybersecurity Awareness Training &mdash; built for workforce education</footer>
+</div>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    title: "Suspicious login alert",
+    desc: "Read the email below carefully. Click on every part of the email that is a phishing red flag — including the sender address, subject line, or body text.",
+    from_display: "IT Security Team &lt;it-security@micros0ft-helpdesk.net&gt;",
+    to: "you@yourcompany.com",
+    subject: "URGENT: Your account will be locked in 24 hours!",
+    body: [
+      { id:"s1_b1", text:"Dear Valued Employee,", flag:false },
+      { id:"s1_b2", text:" We have detected unusual activity on your account. ", flag:false },
+      { id:"s1_b3", text:"You must verify your credentials immediately or your account will be permanently deleted within 24 hours.", flag:true, label:"Urgency + threat language — designed to panic you into acting fast" },
+      { id:"s1_b4", text:"\n\nClick the link below to confirm your identity:\n", flag:false },
+      { id:"s1_b5", text:"http://login-verify.micros0ft-helpdesk.net/confirm?user=you", flag:true, label:"Suspicious URL — 'micros0ft' uses a zero instead of the letter O" },
+      { id:"s1_b6", text:"\n\nIf you do not act within 24 hours your account access will be revoked.\n\nRegards,\nIT Security Team", flag:false },
+    ],
+    header_flags: {
+      from: { flag:true, label:"Sender domain is 'micros0ft-helpdesk.net' — not a real Microsoft domain" },
+      subject: { flag:true, label:"ALL CAPS and exclamation marks create false urgency" },
+    },
+    total_flags: 4,
+    tips: [
+      "Real Microsoft emails come from @microsoft.com — never third-party domains.",
+      "Legitimate IT teams never threaten instant account deletion via email.",
+      "Hover over links before clicking — the domain here uses a zero (0) instead of the letter O.",
+      "Subject lines with ALL CAPS and excessive urgency are a classic phishing tactic.",
+    ]
+  },
+  {
+    id: 2,
+    title: "Gift card request from the boss",
+    desc: "Your CEO just sent you an email. Read it carefully and click every phishing red flag you spot.",
+    from_display: "CEO - James Harrington &lt;ceo.jharrington@gmail.com&gt;",
+    to: "you@yourcompany.com",
+    subject: "Quick favor — need your help ASAP",
+    body: [
+      { id:"s2_b1", text:"Hey,\n\nI'm in a board meeting right now and can't talk. I need you to quietly purchase ", flag:false },
+      { id:"s2_b2", text:"5 x $200 Amazon gift cards", flag:true, label:"Unusual financial request — gift cards are untraceable and a common fraud tactic" },
+      { id:"s2_b3", text:" for a client gift. ", flag:false },
+      { id:"s2_b4", text:"Don't tell anyone else in the office — this is confidential.", flag:true, label:"Secrecy request — isolates you and prevents you from verifying the request" },
+      { id:"s2_b5", text:"\n\nJust scratch off the codes and email them directly to: ", flag:false },
+      { id:"s2_b6", text:"harrington.ceo.gifts@gmail.com", flag:true, label:"Different reply-to address — not the company domain" },
+      { id:"s2_b7", text:"\n\nThanks,\nJames", flag:false },
+    ],
+    header_flags: {
+      from: { flag:true, label:"A CEO using a personal Gmail — real executives use the company email domain" },
+      subject: { flag:false, label:"" },
+    },
+    total_flags: 4,
+    tips: [
+      "Executives never ask employees to purchase gift cards via email.",
+      "Requests for secrecy ('don't tell anyone') are a manipulation tactic.",
+      "Always verify unusual financial requests by phone using a number you already have.",
+      "A real CEO's email comes from the company domain, not a personal Gmail account.",
+    ]
+  },
+  {
+    id: 3,
+    title: "IT password reset",
+    desc: "Your IT help desk sent you a message. Click every part of the email that is a red flag.",
+    from_display: "IT Help Desk &lt;helpdesk@yourcompany-itsupport.com&gt;",
+    to: "you@yourcompany.com",
+    subject: "Action Required: Reset your password now",
+    body: [
+      { id:"s3_b1", text:"Hello,\n\nOur system detected your password has not been changed in 90 days. For security purposes, please reset it now.\n\n", flag:false },
+      { id:"s3_b2", text:"Please provide your current username and password", flag:true, label:"Legitimate IT never asks for your current password — they can reset it without knowing it" },
+      { id:"s3_b3", text:" so we can verify your identity before issuing a new one.\n\n", flag:false },
+      { id:"s3_b4", text:"Username: _____________\nCurrent Password: _____________\n\n", flag:true, label:"No legitimate form ever asks you to fill in your current password" },
+      { id:"s3_b5", text:"Reply to this email with that information.", flag:true, label:"Asking you to reply with credentials — a major red flag" },
+      { id:"s3_b6", text:"\n\nThis request expires in 2 hours.\n\nThank you,\nIT Help Desk", flag:false },
+    ],
+    header_flags: {
+      from: { flag:true, label:"Domain is 'yourcompany-itsupport.com' — not the real company domain, just looks similar" },
+      subject: { flag:false, label:"" },
+    },
+    total_flags: 4,
+    tips: [
+      "No legitimate IT department will ever ask for your current password.",
+      "Real password resets use a secure link — never an email reply with credentials.",
+      "The sender domain includes your company name but is not the real domain.",
+      "Time pressure ('expires in 2 hours') is designed to stop you from thinking critically.",
+    ]
+  }
+];
+
+let currentScenario = 0;
+let totalScore = 0;
+let selectedIds = new Set();
+let submitted = false;
+
+function renderScenario(idx) {
+  submitted = false;
+  selectedIds = new Set();
+  const s = scenarios[idx];
+  const progress = Math.round((idx / scenarios.length) * 100);
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  // Build email body HTML
+  let bodyHtml = '';
+  s.body.forEach(chunk => {
+    const text = chunk.text.replace(/\n/g, '<br>');
+    const labelSafe = (chunk.label || '').replace(/'/g, "\\'");
+    if (chunk.flag) {
+      bodyHtml += `<span class="hotspot" id="${chunk.id}" onclick="toggleHotspot('${chunk.id}', true, '${labelSafe}')">${text}</span>`;
+    } else {
+      bodyHtml += `<span class="hotspot" id="${chunk.id}" onclick="toggleHotspot('${chunk.id}', false, '')">${text}</span>`;
+    }
+  });
+
+  const fromLabelSafe = (s.header_flags.from.label || '').replace(/'/g, "\\'");
+  const subjLabelSafe = (s.header_flags.subject && s.header_flags.subject.label ? s.header_flags.subject.label : '').replace(/'/g, "\\'");
+
+  const html = `
+    <div class="scenario-card">
+      <div class="scenario-label">Scenario ${idx+1} of ${scenarios.length}</div>
+      <div class="scenario-title">${s.title}</div>
+      <div class="scenario-desc">${s.desc}</div>
+      <div class="instruction-box">
+        <i class="ti ti-mouse-2" style="font-size:18px; flex-shrink:0;"></i>
+        Click each part of the email that looks suspicious — including the sender, subject, or body.
+      </div>
+      <div class="email-frame">
+        <div class="email-header-bar">
+          <div class="email-field">
+            <span class="email-field-label">From:</span>
+            <span class="hotspot" id="hdr_from" onclick="toggleHotspot('hdr_from', ${s.header_flags.from.flag}, '${fromLabelSafe}')">${s.from_display}</span>
+          </div>
+          <div class="email-field">
+            <span class="email-field-label">To:</span>
+            <span>${s.to}</span>
+          </div>
+        </div>
+        <div class="email-subject-bar hotspot" id="hdr_subj" onclick="toggleHotspot('hdr_subj', ${!!(s.header_flags.subject && s.header_flags.subject.flag)}, '${subjLabelSafe}')">
+          ${s.subject}
+        </div>
+        <div class="email-body">${bodyHtml}</div>
+      </div>
+      <div class="mini-toast" id="miniToast"></div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <button class="btn-primary" id="submitBtn" onclick="submitAnswer()">
+          <i class="ti ti-check" style="margin-right:6px;"></i>Submit my answers
+        </button>
+        <span class="sel-count" id="selCount">0 red flags selected</span>
+      </div>
+      <div class="feedback-panel" id="feedbackPanel"></div>
+      <div class="next-wrap" id="nextWrap">
+        ${idx < scenarios.length - 1
+          ? `<button class="btn-primary" onclick="nextScenario()">Next scenario <i class="ti ti-arrow-right" style="margin-left:6px;"></i></button>`
+          : `<button class="btn-primary" onclick="showFinal()">See my results <i class="ti ti-award" style="margin-left:6px;"></i></button>`
+        }
+      </div>
+    </div>`;
+
+  document.getElementById('scenarioArea').innerHTML = html;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleHotspot(id, isFlag, label) {
+  if (submitted) return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  const toast = document.getElementById('miniToast');
+
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+    el.classList.remove('selected-correct', 'selected-wrong');
+    toast.textContent = '';
+  } else {
+    selectedIds.add(id);
+    if (isFlag) {
+      el.classList.add('selected-correct');
+      toast.style.color = '#27ae60';
+      toast.textContent = '✓ ' + label;
+    } else {
+      el.classList.add('selected-wrong');
+      toast.style.color = '#c0392b';
+      toast.textContent = '✗ That part looks okay — keep looking!';
+    }
+  }
+  document.getElementById('selCount').textContent =
+    selectedIds.size + ' red flag' + (selectedIds.size !== 1 ? 's' : '') + ' selected';
+}
+
+function submitAnswer() {
+  if (submitted) return;
+  submitted = true;
+  const s = scenarios[currentScenario];
+
+  const allFlags = [];
+  s.body.forEach(c => { if (c.flag) allFlags.push(c.id); });
+  if (s.header_flags.from.flag) allFlags.push('hdr_from');
+  if (s.header_flags.subject && s.header_flags.subject.flag) allFlags.push('hdr_subj');
+
+  let correctHits = 0, wrongHits = 0;
+  selectedIds.forEach(id => {
+    if (allFlags.includes(id)) correctHits++;
+    else wrongHits++;
+  });
+
+  const missed = allFlags.filter(id => !selectedIds.has(id));
+  missed.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('revealed-missed');
+  });
+
+  const scenScore = Math.max(0, correctHits * 10 - wrongHits * 3);
+  totalScore += scenScore;
+  document.getElementById('scoreDisp').textContent = totalScore;
+
+  const panel = document.getElementById('feedbackPanel');
+  panel.style.display = 'block';
+
+  let gradeClass;
+  if (wrongHits === 0 && missed.length === 0) gradeClass = 'correct';
+  else if (correctHits >= Math.ceil(allFlags.length / 2)) gradeClass = 'partial';
+  else gradeClass = 'wrong';
+
+  const gradeLabel = { correct: 'Perfect!', partial: 'Good effort!', wrong: 'Keep practicing!' }[gradeClass];
+
+  let fbHtml = `<div class="feedback-title">${gradeLabel} You spotted ${correctHits} of ${allFlags.length} red flags.`;
+  if (scenScore > 0) fbHtml += ` <span class="score-pill">+${scenScore} pts</span>`;
+  fbHtml += `</div><ul class="feedback-list">`;
+  s.tips.forEach(t => { fbHtml += `<li>${t}</li>`; });
+  fbHtml += `</ul>`;
+  if (missed.length > 0) {
+    fbHtml += `<p style="margin-top:8px; font-size:13px;">Missed flags are highlighted in <span style="color:#e67e22; font-weight:600;">orange dashes</span> above.</p>`;
+  }
+
+  panel.className = 'feedback-panel ' + gradeClass;
+  panel.innerHTML = fbHtml;
+
+  document.getElementById('nextWrap').style.display = 'block';
+  document.getElementById('submitBtn').disabled = true;
+}
+
+function nextScenario() {
+  currentScenario++;
+  renderScenario(currentScenario);
+}
+
+function showFinal() {
+  const maxPossible = scenarios.reduce((sum, s) => sum + s.total_flags * 10, 0);
+  const pct = Math.round((totalScore / maxPossible) * 100);
+
+  let badge, badgeClass, label, sub;
+  if (pct >= 80) {
+    badge = '🛡️'; badgeClass = 'great';
+    label = 'Phishing Defender!';
+    sub = 'You have strong awareness of phishing tactics. Keep up the vigilance.';
+  } else if (pct >= 50) {
+    badge = '⚠️'; badgeClass = 'good';
+    label = 'Good Awareness';
+    sub = 'You caught many threats, but a few slipped by. Review the tips below and try again.';
+  } else {
+    badge = '📋'; badgeClass = 'needs-work';
+    label = 'More Practice Needed';
+    sub = 'Phishing emails can fool anyone. Review the key takeaways and retake this module.';
+  }
+
+  const html = `
+    <div class="scenario-card final-screen">
+      <div class="final-badge ${badgeClass}">${badge}</div>
+      <div class="final-score-num">${pct}%</div>
+      <div class="final-label">${label}</div>
+      <div class="final-sub">${sub} &nbsp;(Score: ${totalScore} pts)</div>
+      <div class="key-takeaways">
+        <h3><i class="ti ti-bulb" style="margin-right:6px;"></i>Key takeaways</h3>
+        <ul>
+          <li>Always verify the sender's email domain — not just the display name.</li>
+          <li>Legitimate organizations never ask for your password via email.</li>
+          <li>Urgency and secrecy are manipulation tools — slow down and verify independently.</li>
+          <li>Hover over links before clicking to check the actual destination URL.</li>
+          <li>When in doubt, call IT or your manager directly using a number you already know.</li>
+        </ul>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="restartTraining()">
+          <i class="ti ti-refresh" style="margin-right:6px;"></i>Retake training
+        </button>
+      </div>
+    </div>`;
+
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('scenarioArea').innerHTML = html;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartTraining() {
+  currentScenario = 0;
+  totalScore = 0;
+  document.getElementById('scoreDisp').textContent = '0';
+  renderScenario(0);
+}
+
+renderScenario(0);
+</script>
+</body>
+</html>
